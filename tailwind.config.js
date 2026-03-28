@@ -5,6 +5,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        /* shadcn semantic — mapped to tool-first palette */
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -38,11 +39,28 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+
+        /* Functional colors — result card */
+        warning: {
+          DEFAULT: 'hsl(var(--warning-bg))',
+          text: 'hsl(var(--warning-text))',
+          border: 'hsl(var(--warning-border))',
+        },
+      },
+      fontFamily: {
+        sans: ['"IBM Plex Sans"', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'monospace'],
+      },
+      letterSpacing: {
+        display: '-0.025em',
+        label: '0.12em',
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        sm: '2px',
+        md: '4px',
+        lg: '6px',
+        xl: '8px',
+        pill: '100px',
       },
     },
   },
