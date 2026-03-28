@@ -1,51 +1,66 @@
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    /* Tool-first: light monochrome base, Okta navy accent */
+    --background: 0 0% 98%;          /* #fafafa */
+    --foreground: 0 0% 10%;          /* #1a1a1a */
+    --card: 0 0% 100%;               /* #ffffff */
+    --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 13%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 97%;
-    --secondary-foreground: 0 0% 13%;
-    --muted: 0 0% 97%;
-    --muted-foreground: 0 0% 56%;
-    --accent: 0 0% 97%;
-    --accent-foreground: 0 0% 13%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 214 83% 48%;          /* #1662dd okta navy */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;           /* #f5f5f5 */
+    --secondary-foreground: 0 0% 33%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 60%;    /* #999 */
+    --accent: 214 100% 97%;          /* #eff6ff light blue */
+    --accent-foreground: 214 45% 24%; /* #1e3a5f dark navy */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 92%;
-    --input: 0 0% 92%;
-    --ring: 0 0% 71%;
-    --radius: 0.625rem;
+    --border: 0 0% 90%;              /* #e5e5e5 */
+    --input: 0 0% 90%;
+    --ring: 214 83% 48%;             /* okta navy for focus */
+    --radius: 0.25rem;               /* 4px — tight, tool-like */
+
+    /* Functional colors — used on result card only */
+    --warning-bg: 48 96% 89%;        /* amber */
+    --warning-text: 28 73% 26%;
+    --warning-border: 48 96% 77%;
   }
 
   .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 13%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 13%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 92%;
-    --primary-foreground: 0 0% 13%;
-    --secondary: 0 0% 27%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 27%;
-    --muted-foreground: 0 0% 71%;
-    --accent: 0 0% 27%;
-    --accent-foreground: 0 0% 98%;
+    --background: 0 0% 7%;           /* #111 */
+    --foreground: 0 0% 93%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 214 83% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 214 40% 15%;
+    --accent-foreground: 214 80% 80%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 27%;
-    --input: 0 0% 27%;
-    --ring: 0 0% 56%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 214 83% 55%;
+
+    --warning-bg: 28 50% 12%;
+    --warning-text: 48 80% 70%;
+    --warning-border: 28 40% 25%;
   }
 
   * {
@@ -53,6 +68,6 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
 }
