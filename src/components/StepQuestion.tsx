@@ -29,6 +29,7 @@ export function StepQuestion({
             {step.question}
           </h2>
           <Popover>
+            {/* openOnHover is a PopoverTrigger prop in base-ui v1.3, not on the Root */}
             <PopoverTrigger
               openOnHover
               className="mt-0.5 inline-flex shrink-0 items-center justify-center rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"

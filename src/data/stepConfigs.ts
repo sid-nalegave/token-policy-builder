@@ -66,7 +66,7 @@ export const STEP_CONFIGS: StepConfig[] = [
     label: 'Sensitivity tier',
     question: 'How sensitive is the data this app accesses or processes?',
     tooltip:
-      'How sensitive is the data this app accesses or processes.',
+      'Drives access token lifetime, re-authentication frequency, and refresh token rotation policy. High-sensitivity tiers tighten all three — low gives more flexibility to balance user friction.',
     options: [
       {
         value: 'low',
