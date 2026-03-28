@@ -29,3 +29,40 @@ All UI copy follows `src/design/VOICE.md`. Practitioner-to-practitioner tone. No
 
 ## Accuracy over features
 This tool's primary requirement is correctness. Every numeric recommendation must trace to a specific standards clause or be explicitly labeled as community practice. When in doubt, flag for review rather than silently include.
+
+## Git and GitHub conventions
+
+**Branches**
+- One branch per phase: `phase/1-scaffold`, `phase/2-design-tokens`, etc.
+- Never commit directly to `main` — branch protection enforces this.
+- Open a PR to merge each phase. The PR is the gate — user reviews diff before merging.
+- Reference the GitHub issue in the PR description.
+
+**Commit messages — conventional commits**
+- `feat:` new functionality
+- `fix:` bug fix
+- `chore:` config, deps, tooling
+- `refactor:` restructuring with no behavior change
+- Keep the subject line short and specific. Example: `feat: add stepper with M2M skip logic`
+
+## Code conventions
+
+**File naming**
+- Component files: PascalCase — `StepperBar.tsx`
+- Everything else: camelCase — `computePolicy.ts`, `useStepFlow.ts`
+- One component per file.
+
+**Folder structure**
+```
+src/
+  components/     # UI components
+  components/ui/  # shadcn-generated — do not edit manually
+  engine/         # rules engine — pure TS, no React
+  design/         # copied tokens and VOICE.md
+  hooks/          # custom React hooks
+  types/          # shared TypeScript types
+```
+
+**Styling**
+- Tailwind utility classes only. No custom CSS files except `tokens.css`.
+- No inline `style=` props unless there is no Tailwind alternative.
