@@ -44,6 +44,8 @@ This tool's primary requirement is correctness. Every numeric recommendation mus
 - `chore:` config, deps, tooling
 - `refactor:` restructuring with no behavior change
 - Keep the subject line short and specific. Example: `feat: add stepper with M2M skip logic`
+- One line only — no multi-line body unless essential context can't be inferred from the diff.
+- No `Co-Authored-By` tags.
 
 ## Code conventions
 
