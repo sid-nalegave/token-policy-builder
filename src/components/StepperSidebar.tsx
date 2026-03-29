@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react'
-import type { StepConfig, PolicyInputs } from '@/types/steps'
+import type { StepConfig } from '@/types/steps'
+import type { PolicyInputs } from '@/engine/types'
 import { cn } from '@/lib/utils'
 
 interface StepperSidebarProps {

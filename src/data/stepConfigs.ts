@@ -1,4 +1,5 @@
-import type { StepConfig, PolicyInputs } from '@/types/steps'
+import type { StepConfig } from '@/types/steps'
+import type { PolicyInputs } from '@/engine/types'
 
 const isM2M = (inputs: PolicyInputs) => inputs.appType === 'm2m'
 
@@ -156,7 +157,7 @@ export const STEP_CONFIGS: StepConfig[] = [
     label: 'Idle session behavior',
     question: 'How should idle sessions behave?',
     tooltip:
-      'Sliding window resets the inactivity timer on each user action — the session stays alive as long as the user is active. Fixed expiry terminates the session at a hard deadline regardless of activity. NIST 800-63B requires both inactivity timeout and absolute session limit at AAL2+ — they are not alternatives. HIPAA automatic logoff is addressable, not required, and specifies no numeric value.',
+      'Sliding window resets the inactivity timer on each user action — the session stays alive as long as the user is active. Fixed expiry terminates the session at a hard deadline regardless of activity. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL) and recommends an inactivity timeout (SHOULD) — they are complementary, not alternatives. HIPAA automatic logoff is addressable, not required, and specifies no numeric value.',
     options: [
       {
         value: 'sliding',
