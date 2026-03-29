@@ -78,24 +78,6 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     })
   }
 
-  // No token revocation capability
-  // No revocation input exists — this tool cannot verify revocation support.
-  // For user-session apps: RFC 7009 + NIST 800-63B §7.1 logout compliance.
-  // For M2M: RFC 7009 still applies — compromised client tokens must be revocable.
-  if (appType === 'm2m') {
-    warnings.push({
-      id: 'no-revocation',
-      message:
-        'Without RFC 7009 token revocation support, a compromised client token remains valid until expiry. Verify your authorization server supports token revocation and that your client rotates or revokes tokens on credential compromise.',
-    })
-  } else {
-    warnings.push({
-      id: 'no-revocation',
-      message:
-        'Without RFC 7009 token revocation support, a compromised token remains valid until expiry. NIST 800-63B §7.1 requires session secrets be invalidated on logout — not achievable without revocation. Verify your authorization server supports and enforces token revocation.',
-    })
-  }
-
   // TODO(phase-5): consumer + refresh token lifetime > 30 days
   // Requires computed refreshTokenLifetime.value — add after numeric values are filled in.
 
@@ -177,8 +159,8 @@ function assembleCitations(inputs: PolicyInputs): PolicyCitation[] {
   } else if (inputs.appType === 'mobile') {
     citations.push({
       field: 'tokenStorage',
-      standard: 'RFC 9700',
-      note: 'TODO(phase-5): cite secure storage requirements for native apps; cross-reference OWASP MASTG.',
+      standard: 'RFC 8252',
+      note: 'TODO(phase-5): cite secure storage requirements for native apps per OAuth 2.0 for Native Apps; cross-reference OWASP MASTG.',
     })
   } else if (inputs.appType === 'm2m') {
     citations.push({
@@ -244,6 +226,21 @@ function buildReAuthTriggers(inputs: PolicyInputs): {
   }
 }
 
+// ── Disclaimer assembly ────────────────────────────────────────────────────
+
+const BASE_DISCLAIMER =
+  'Recommendations are grounded in NIST SP 800-63B Rev 4, RFC 9700, RFC 6749, RFC 9068, and draft-ietf-oauth-browser-based-apps-26 — not a compliance determination or substitute for a security review. Verify against your ATO, organizational requirements, or legal counsel. Standards basis last verified: March 2026.'
+
+// Token revocation advisory — applies to all app types but is not a targeted
+// warning since this tool cannot verify AS revocation support. Surfaced as a
+// disclaimer note rather than a warning to avoid false-positive fatigue.
+const REVOCATION_ADVISORY =
+  'This tool cannot verify whether your authorization server supports RFC 7009 token revocation. Revocation is required for NIST 800-63B §7.1 logout compliance (user-session apps) and recommended for all deployments. Verify support before relying on token expiry as the sole invalidation mechanism.'
+
+function buildDisclaimer(): string[] {
+  return [BASE_DISCLAIMER, REVOCATION_ADVISORY]
+}
+
 // ── computePolicy ──────────────────────────────────────────────────────────
 
 // Placeholder used for all numeric fields until phase-5 values are designed.
@@ -271,11 +268,15 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
       : null,
 
     refreshTokenRotation: {
-      // TODO(phase-5): refine per RFC 9700 §2.2.2 — public clients MUST use rotation
-      // OR sender-constraining (not rotation alone). Confidential clients: existing
-      // RFC 6749 binding is sufficient; rotation is an additional protection, not a
-      // recommendation from §2.2.2 itself.
-      value: isM2M || !usesRefreshTokens ? 'not-applicable' : 'required',
+      // TODO(phase-5): refine per RFC 9700 §2.2.2 — public clients (SPA, mobile) MUST
+      // use rotation OR sender-constraining. Confidential clients (server): rotation
+      // is an additional protection; §2.2.2 does not mandate it.
+      // Stub uses 'required' for public clients, 'recommended' for confidential.
+      value: isM2M || !usesRefreshTokens
+        ? 'not-applicable'
+        : inputs.appType === 'server'
+        ? 'recommended'
+        : 'required',
       rationale: TODO,
       standardsFloor: TODO,
     },
@@ -301,5 +302,6 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     reAuthTriggersApp: reAuth.app,
     warnings,
     citations,
+    disclaimer: buildDisclaimer(),
   }
 }

@@ -156,29 +156,26 @@ describe('warning: high-sliding-no-absolute', () => {
   })
 })
 
-// ── no-revocation ─────────────────────────────────────────────────────────
+// ── no-revocation — moved to disclaimer ───────────────────────────────────
 
-describe('warning: no-revocation', () => {
-  it('always fires for user-session apps', () => {
-    expect(warningIds(base)).toContain('no-revocation')
+describe('revocation advisory in disclaimer', () => {
+  it('no-revocation is not in warnings', () => {
+    expect(warningIds(base)).not.toContain('no-revocation')
+    expect(warningIds({ ...base, appType: 'm2m' })).not.toContain('no-revocation')
   })
 
-  it('fires for M2M with M2M-specific message', () => {
-    const ids = warningIds({ ...base, appType: 'm2m' })
-    expect(ids).toContain('no-revocation')
+  it('disclaimer always contains RFC 7009 revocation advisory', () => {
+    expect(computePolicy(base).disclaimer.some((d) => d.includes('RFC 7009'))).toBe(true)
   })
 
-  it('M2M message does not reference NIST 800-63B logout', () => {
-    const result = computePolicy({ ...base, appType: 'm2m' })
-    const warning = result.warnings.find((w) => w.id === 'no-revocation')
-    expect(warning?.message).not.toContain('NIST 800-63B')
-    expect(warning?.message).not.toContain('logout')
+  it('disclaimer always contains the base boilerplate', () => {
+    expect(computePolicy(base).disclaimer.some((d) => d.includes('NIST SP 800-63B Rev 4'))).toBe(true)
   })
 
-  it('non-M2M message references NIST 800-63B logout', () => {
-    const result = computePolicy(base)
-    const warning = result.warnings.find((w) => w.id === 'no-revocation')
-    expect(warning?.message).toContain('NIST 800-63B')
+  it('disclaimer applies to M2M as well', () => {
+    expect(
+      computePolicy({ ...base, appType: 'm2m' }).disclaimer.some((d) => d.includes('RFC 7009'))
+    ).toBe(true)
   })
 })
 
@@ -210,9 +207,42 @@ describe('refresh token output', () => {
     expect(result.refreshTokenRotation.value).toBe('not-applicable')
   })
 
-  it('refreshTokenRotation is required for non-M2M app with refresh tokens', () => {
-    const result = computePolicy({ ...base, refreshTokenUsage: 'yes' })
+  it('refreshTokenRotation is required for public client (SPA) with refresh tokens', () => {
+    const result = computePolicy({ ...base, appType: 'spa', refreshTokenUsage: 'yes' })
     expect(result.refreshTokenRotation.value).toBe('required')
+  })
+
+  it('refreshTokenRotation is recommended for confidential client (server) with refresh tokens', () => {
+    const result = computePolicy({ ...base, appType: 'server', refreshTokenUsage: 'yes' })
+    expect(result.refreshTokenRotation.value).toBe('recommended')
+  })
+})
+
+// ── tokenStorage citations ────────────────────────────────────────────────
+
+describe('tokenStorage citations', () => {
+  function storeCitation(inputs: PolicyInputs) {
+    return computePolicy(inputs).citations.find((c) => c.field === 'tokenStorage')
+  }
+
+  it('SPA cites draft-ietf-oauth-browser-based-apps-26', () => {
+    expect(storeCitation({ ...base, appType: 'spa' })?.standard).toBe(
+      'draft-ietf-oauth-browser-based-apps-26'
+    )
+  })
+
+  it('server cites RFC 6749', () => {
+    expect(storeCitation({ ...base, appType: 'server' })?.standard).toBe('RFC 6749')
+  })
+
+  it('mobile cites RFC 8252', () => {
+    expect(storeCitation({ ...base, appType: 'mobile' })?.standard).toBe('RFC 8252')
+  })
+
+  it('M2M cites RFC 6749 §4.4', () => {
+    const citation = storeCitation({ ...base, appType: 'm2m' })
+    expect(citation?.standard).toBe('RFC 6749')
+    expect(citation?.clause).toBe('§4.4')
   })
 })
 

@@ -96,4 +96,11 @@ export interface PolicyResult {
 
   warnings: PolicyWarning[]
   citations: PolicyCitation[]
+
+  /**
+   * Rendered at the bottom of the result card. First paragraph is always the
+   * standard boilerplate. Additional paragraphs are appended for universal
+   * advisories that apply regardless of input (e.g. token revocation).
+   */
+  disclaimer: string[]
 }
