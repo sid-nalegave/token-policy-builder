@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import type { PolicyInputs } from '@/types/steps'
+import type { PolicyInputs } from '@/engine/types'
 import { STEP_CONFIGS } from '@/data/stepConfigs'
 
 function clearSkippedInputs(inputs: PolicyInputs): PolicyInputs {

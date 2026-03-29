@@ -1,20 +1,6 @@
-export type AppType = 'spa' | 'server' | 'mobile' | 'm2m'
-export type UserPopulation = 'employees' | 'consumers' | 'partners'
-export type SensitivityTier = 'low' | 'medium' | 'high'
-export type ComplianceFramework = 'none' | 'soc2' | 'hipaa' | 'fedramp-moderate' | 'fedramp-high'
-export type RefreshTokenUsage = 'yes' | 'no'
-export type IdleSessionBehavior = 'sliding' | 'fixed'
-export type TokenBinding = 'none' | 'dpop' | 'mtls'
+import type { PolicyInputs } from '@/engine/types'
 
-export interface PolicyInputs {
-  appType?: AppType
-  userPopulation?: UserPopulation
-  sensitivityTier?: SensitivityTier
-  complianceFramework?: ComplianceFramework
-  refreshTokenUsage?: RefreshTokenUsage
-  idleBehavior?: IdleSessionBehavior
-  tokenBinding?: TokenBinding
-}
+export type { PolicyInputs }
 
 export interface StepOption {
   value: string
