@@ -62,7 +62,7 @@ function bindingMin(candidates: Array<[number, string]>): [number, string] {
 
 // ── Binding constraint label map ────────────────────────────────────────────
 
-const AT_BASE_LABEL: Record<AppType, string> = {
+const APP_TYPE_BASE_LABEL: Record<AppType, string> = {
   spa: 'SPA public client baseline',
   server: 'Server confidential client baseline',
   mobile: 'Mobile public client baseline',
@@ -94,7 +94,7 @@ function computeAccessTokenLifetime(inputs: PolicyInputs): NumericRecommendation
   const complianceFramework = inputs.complianceFramework ?? 'none'
 
   const candidates: Array<[number, string]> = [
-    [AT_BASE[appType], AT_BASE_LABEL[appType]],
+    [AT_BASE[appType], APP_TYPE_BASE_LABEL[appType]],
     [AT_SENSITIVITY_CAP[sensitivityTier], SENSITIVITY_LABEL[sensitivityTier]],
   ]
   const complianceCap = AT_COMPLIANCE_CAP[complianceFramework]
@@ -140,7 +140,7 @@ function computeRefreshTokenLifetime(inputs: PolicyInputs): NumericRecommendatio
   const userPopulation = inputs.userPopulation ?? 'employees'
 
   const candidates: Array<[number, string]> = [
-    [RT_BASE[appType], AT_BASE_LABEL[appType]],
+    [RT_BASE[appType], APP_TYPE_BASE_LABEL[appType]],
   ]
   const populationCap = RT_POPULATION_CAP[userPopulation]
   if (populationCap !== undefined) {
@@ -194,10 +194,8 @@ function computeAbsoluteSessionLimit(inputs: PolicyInputs): NumericRecommendatio
   }
 
   const [value, rawLabel] = bindingMin(candidates)
-  const label =
-    complianceCap !== undefined && complianceCap === value
-      ? COMPLIANCE_LABEL[complianceFramework]!
-      : rawLabel
+  const isComplianceBinding = complianceCap !== undefined && complianceCap === value
+  const label = isComplianceBinding ? COMPLIANCE_LABEL[complianceFramework]! : rawLabel
 
   const sensitivityFloorMap: Record<SensitivityTier, string> = {
     low: 'Community practice. NIST SP 800-63B Rev 4 AAL1: session limit SHALL be established; SHOULD ≤30 days.',
@@ -205,14 +203,17 @@ function computeAbsoluteSessionLimit(inputs: PolicyInputs): NumericRecommendatio
       'NIST SP 800-63B Rev 4 AAL2: SHALL establish; SHOULD ≤24h. Recommendation is stricter at 12h — aligned with Rev 3 AAL2 SHALL.',
     high: 'Community practice — stricter than AAL2 24h SHOULD, aligned with AAL3 12h SHALL as a conservative target.',
   }
-  const complianceFloorMap: Record<string, string> = {
-    'HIPAA community practice':
+  // Keyed on ComplianceFramework to avoid silent breakage if COMPLIANCE_LABEL strings change.
+  const complianceFloorMap: Partial<Record<ComplianceFramework, string>> = {
+    hipaa:
       'Community practice for ePHI access environments. HIPAA §164.312(a)(2)(iii) requires automatic logoff — no specific numeric value mandated.',
-    'FedRAMP Moderate compliance controls':
+    'fedramp-moderate':
       'NIST SP 800-63B Rev 4 AAL2: SHALL establish; SHOULD ≤24h. Recommendation is stricter at 12h — aligned with Rev 3 AAL2 SHALL.',
-    'FedRAMP High compliance controls': 'NIST SP 800-63B Rev 4 AAL3: SHALL ≤12h.',
+    'fedramp-high': 'NIST SP 800-63B Rev 4 AAL3: SHALL ≤12h.',
   }
-  const standardsFloor = complianceFloorMap[label] ?? sensitivityFloorMap[sensitivityTier]
+  const standardsFloor =
+    (isComplianceBinding ? complianceFloorMap[complianceFramework] : undefined) ??
+    sensitivityFloorMap[sensitivityTier]
 
   return {
     value,
@@ -236,10 +237,8 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
   }
 
   const [value, rawLabel] = bindingMin(candidates)
-  const label =
-    complianceCap !== undefined && complianceCap === value
-      ? COMPLIANCE_LABEL[complianceFramework]!
-      : rawLabel
+  const isComplianceBinding = complianceCap !== undefined && complianceCap === value
+  const label = isComplianceBinding ? COMPLIANCE_LABEL[complianceFramework]! : rawLabel
 
   const sensitivityFloorMap: Record<SensitivityTier, string> = {
     low: 'Community practice. NIST SP 800-63B Rev 4 AAL1: inactivity timeout is optional (MAY).',
@@ -247,19 +246,22 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
       'NIST SP 800-63B Rev 4 AAL2: inactivity timeout SHOULD ≤60 min. Recommendation is stricter at 30 min — aligned with Rev 3 AAL2 SHALL 30 min.',
     high: 'NIST SP 800-63B Rev 4 AAL3: inactivity timeout SHOULD ≤15 min.',
   }
-  const complianceFloorMap: Record<string, string> = {
-    'HIPAA community practice':
+  // Keyed on ComplianceFramework to avoid silent breakage if COMPLIANCE_LABEL strings change.
+  const complianceFloorMap: Partial<Record<ComplianceFramework, string>> = {
+    hipaa:
       'Community practice. HIPAA §164.312(a)(2)(iii) automatic logoff is addressable — no specific numeric value mandated. 15 min is industry standard for clinical environments.',
-    'FedRAMP Moderate compliance controls':
+    'fedramp-moderate':
       'NIST SP 800-63B Rev 4 AAL2: inactivity timeout SHOULD ≤60 min. SC-10 mandates inactivity disconnect — 30 min aligned with NIST Rev 3 AAL2 SHALL 30 min.',
-    'FedRAMP High compliance controls':
+    'fedramp-high':
       'NIST SP 800-63B Rev 4 AAL3: inactivity timeout SHOULD ≤15 min. SC-10 FedRAMP High: 15 min for user sessions.',
   }
 
   return {
     value,
     rationale: `${label} drives this value.`,
-    standardsFloor: complianceFloorMap[label] ?? sensitivityFloorMap[sensitivityTier],
+    standardsFloor:
+      (isComplianceBinding ? complianceFloorMap[complianceFramework] : undefined) ??
+      sensitivityFloorMap[sensitivityTier],
   }
 }
 

@@ -401,6 +401,15 @@ describe('idleTimeout numeric values', () => {
   })
 })
 
+// ── idleTimeoutIdp mirrors idleTimeoutApp ─────────────────────────────────
+
+describe('idleTimeoutIdp mirrors idleTimeoutApp', () => {
+  it('idleTimeoutIdp.value equals idleTimeoutApp.value', () => {
+    const r = computePolicy({ ...base, sensitivityTier: 'medium', complianceFramework: 'hipaa' })
+    expect(r.idleTimeoutIdp?.value).toBe(r.idleTimeoutApp?.value)
+  })
+})
+
 // ── compliance-driven standardsFloor — idle timeout ──────────────────────
 
 describe('idleTimeout standardsFloor — compliance driven', () => {
@@ -465,6 +474,12 @@ describe('accessTokenLifetime upgradeNote', () => {
 
   it('no upgradeNote when binding is already configured', () => {
     const r = computePolicy({ ...base, sensitivityTier: 'medium', tokenBinding: 'dpop' })
+    expect(r.accessTokenLifetime.upgradeNote).toBeUndefined()
+  })
+
+  it('no upgradeNote for non-M2M low sensitivity with no binding', () => {
+    // Low sensitivity non-M2M: threshold not met, no upgrade note expected
+    const r = computePolicy({ ...base, appType: 'server', sensitivityTier: 'low', tokenBinding: 'none' })
     expect(r.accessTokenLifetime.upgradeNote).toBeUndefined()
   })
 })
