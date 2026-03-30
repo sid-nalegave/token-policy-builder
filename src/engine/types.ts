@@ -46,6 +46,7 @@ export type RefreshTokenRotation = 'required' | 'recommended' | 'not-applicable'
 export interface PolicyWarning {
   id: string
   message: string
+  kind: 'conditional' | 'advisory'
 }
 
 export interface PolicyCitation {
