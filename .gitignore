@@ -25,6 +25,9 @@ dist-ssr/
 *.local
 .vite/
 
+# Internal working docs
+docs/policy-engine-numeric-values.md
+
 # Logs
 *.log
 npm-debug.log*
