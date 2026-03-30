@@ -1,5 +1,5 @@
 # Token Policy
-## Spec v10
+## Spec v1
 
 ---
 
