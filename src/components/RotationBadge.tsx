@@ -33,9 +33,11 @@ export function RotationBadge({ rotation }: RotationBadgeProps) {
       {!isNA && (
         <>
           <p className="text-sm text-muted-foreground mt-1">{rotation.rationale}</p>
-          <p className="text-xs text-muted-foreground/70 mt-1 font-mono">
-            {rotation.standardsFloor}
-          </p>
+          {rotation.value !== 'required' && rotation.standardsFloor && (
+            <p className="text-xs text-muted-foreground/70 mt-1 font-mono">
+              {rotation.standardsFloor}
+            </p>
+          )}
         </>
       )}
     </div>
