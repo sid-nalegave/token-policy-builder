@@ -35,6 +35,10 @@
     --warning-bg: 48 96% 89%;        /* amber */
     --warning-text: 28 73% 26%;
     --warning-border: 48 96% 77%;
+
+    --upgrade-bg: 12 100% 95%;
+    --upgrade-text: 12 60% 30%;
+    --upgrade-border: 12 80% 82%;
   }
 
   .dark {
@@ -61,6 +65,10 @@
     --warning-bg: 28 50% 12%;
     --warning-text: 48 80% 70%;
     --warning-border: 28 40% 25%;
+
+    --upgrade-bg: 12 40% 12%;
+    --upgrade-text: 12 80% 70%;
+    --upgrade-border: 12 40% 22%;
   }
 
   * {

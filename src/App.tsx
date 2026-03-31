@@ -4,6 +4,9 @@ import { STEP_CONFIGS } from '@/data/stepConfigs'
 import { StepperSidebar } from '@/components/StepperSidebar'
 import { StepQuestion } from '@/components/StepQuestion'
 import { StepNavigator } from '@/components/StepNavigator'
+import { ResultCard } from '@/components/ResultCard'
+import { computePolicy } from '@/engine'
+import type { PolicyInputs } from '@/engine/types'
 
 const variants = {
   enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
@@ -23,6 +26,7 @@ function App() {
     goToStep,
     isComplete,
     canGoBack,
+    reset,
   } = useStepFlow()
 
   const currentValue = inputs[currentStep.id]
@@ -45,14 +49,11 @@ function App() {
 
       <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
         {isComplete ? (
-          <div className="rounded-xl border border-border bg-card p-10 text-center shadow-sm">
-            <p className="text-xl font-semibold tracking-display">
-              Assessment complete
-            </p>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Policy recommendation will appear here.
-            </p>
-          </div>
+          <ResultCard
+            result={computePolicy(inputs as Required<PolicyInputs>)}
+            inputs={inputs}
+            onReset={reset}
+          />
         ) : (
           <div className="rounded-xl border border-border bg-card shadow-sm">
             {/* Mobile: step indicator above content */}

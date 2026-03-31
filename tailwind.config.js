@@ -46,6 +46,11 @@ export default {
           text: 'hsl(var(--warning-text))',
           border: 'hsl(var(--warning-border))',
         },
+        upgrade: {
+          DEFAULT: 'hsl(var(--upgrade-bg))',
+          text: 'hsl(var(--upgrade-text))',
+          border: 'hsl(var(--upgrade-border))',
+        },
       },
       fontFamily: {
         sans: ['"IBM Plex Sans"', 'sans-serif'],
