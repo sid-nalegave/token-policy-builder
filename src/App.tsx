@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useStepFlow } from '@/hooks/useStepFlow'
 import { STEP_CONFIGS } from '@/data/stepConfigs'
@@ -29,6 +30,11 @@ function App() {
     reset,
   } = useStepFlow()
 
+  const result = useMemo(
+    () => (isComplete ? computePolicy(inputs as PolicyInputs) : null),
+    [inputs, isComplete]
+  )
+
   const currentValue = inputs[currentStep.id]
   const showNext = currentValue !== undefined
 
@@ -48,9 +54,9 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
-        {isComplete ? (
+        {isComplete && result ? (
           <ResultCard
-            result={computePolicy(inputs as Required<PolicyInputs>)}
+            result={result}
             inputs={inputs}
             onReset={reset}
           />

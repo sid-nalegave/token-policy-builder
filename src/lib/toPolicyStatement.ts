@@ -27,10 +27,20 @@ export function toPolicyStatement(result: PolicyResult, inputs: PolicyInputs): s
     )
   }
 
-  if (result.idleTimeoutIdp !== null) {
-    sentences.push(
-      `Idle timeout: ${formatMinutes(result.idleTimeoutIdp.value)} (IdP and application).`
-    )
+  if (result.idleTimeoutIdp !== null && result.idleTimeoutApp !== null) {
+    if (result.idleTimeoutIdp.value === result.idleTimeoutApp.value) {
+      sentences.push(
+        `Idle timeout: ${formatMinutes(result.idleTimeoutIdp.value)} (IdP and application).`
+      )
+    } else {
+      sentences.push(
+        `Idle timeout: ${formatMinutes(result.idleTimeoutIdp.value)} (IdP), ${formatMinutes(result.idleTimeoutApp.value)} (application).`
+      )
+    }
+  } else if (result.idleTimeoutIdp !== null) {
+    sentences.push(`Idle timeout — IdP: ${formatMinutes(result.idleTimeoutIdp.value)}.`)
+  } else if (result.idleTimeoutApp !== null) {
+    sentences.push(`Idle timeout — application: ${formatMinutes(result.idleTimeoutApp.value)}.`)
   }
 
   sentences.push(`Token storage: ${result.tokenStorage.recommendation}.`)

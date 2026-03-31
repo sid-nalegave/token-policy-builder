@@ -40,7 +40,7 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
     a.href = url
     a.download = 'token-policy.json'
     a.click()
-    URL.revokeObjectURL(url)
+    setTimeout(() => URL.revokeObjectURL(url), 0)
   }
 
   const showReAuth =
