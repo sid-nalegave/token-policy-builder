@@ -5,9 +5,12 @@ import { UpgradeNote } from './UpgradeNote'
 interface PolicyFieldProps {
   label: string
   field: NumericRecommendation
+  dominantDriver?: string
 }
 
-export function PolicyField({ label, field }: PolicyFieldProps) {
+export function PolicyField({ label, field, dominantDriver }: PolicyFieldProps) {
+  const showDriver = field.driver !== dominantDriver
+
   return (
     <div className="flex flex-col">
       <span className="text-[11px] font-medium uppercase tracking-label text-muted-foreground">
@@ -16,8 +19,9 @@ export function PolicyField({ label, field }: PolicyFieldProps) {
       <span className="text-2xl font-semibold tracking-display text-foreground mt-0.5">
         {formatMinutes(field.value)}
       </span>
-      <p className="text-sm text-muted-foreground mt-0.5">{field.rationale}</p>
-      <p className="text-xs text-muted-foreground/70 mt-1 font-mono">{field.standardsFloor}</p>
+      {showDriver && (
+        <span className="text-xs text-muted-foreground mt-0.5">{field.driver}</span>
+      )}
       <UpgradeNote note={field.upgradeNote} />
     </div>
   )

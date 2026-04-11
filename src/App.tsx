@@ -26,8 +26,10 @@ function App() {
     goForward,
     goToStep,
     isComplete,
+    showResult,
     canGoBack,
     reset,
+    editInputs,
   } = useStepFlow()
 
   const result = useMemo(
@@ -44,21 +46,21 @@ function App() {
       <header className="border-b border-border bg-background">
         <div className="mx-auto max-w-4xl px-5 py-5 sm:px-8 sm:py-6">
           <h1 className="text-lg font-semibold tracking-display text-foreground sm:text-xl">
-            Token Policy Builder
+            OAuth Token Policy
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            OAuth token lifetime and session policy for your application,
-            grounded in NIST SP 800-63B and RFC 9700.
+            Token lifetime and session policy recommendations with NIST and RFC citations.
           </p>
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
-        {isComplete && result ? (
+        {showResult && result ? (
           <ResultCard
             result={result}
             inputs={inputs}
             onReset={reset}
+            onEdit={editInputs}
           />
         ) : (
           <div className="rounded-xl border border-border bg-card shadow-sm">

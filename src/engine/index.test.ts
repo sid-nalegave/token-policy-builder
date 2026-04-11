@@ -10,7 +10,6 @@ const base: PolicyInputs = {
   sensitivityTier: 'low',
   complianceFramework: 'none',
   refreshTokenUsage: 'no',
-  idleBehavior: 'fixed',
   tokenBinding: 'none',
 }
 
@@ -90,25 +89,19 @@ describe('warning: spa-high-no-binding', () => {
   })
 })
 
-// ── mobile-sliding-window ─────────────────────────────────────────────────
+// ── mobile-token-refresh ──────────────────────────────────────────────────
 
-describe('warning: mobile-sliding-window', () => {
-  it('fires for mobile + sliding window', () => {
-    expect(
-      warningIds({ ...base, appType: 'mobile', idleBehavior: 'sliding' })
-    ).toContain('mobile-sliding-window')
+describe('warning: mobile-token-refresh', () => {
+  it('fires for any mobile app', () => {
+    expect(warningIds({ ...base, appType: 'mobile' })).toContain('mobile-token-refresh')
   })
 
-  it('does not fire for mobile + fixed expiry', () => {
-    expect(
-      warningIds({ ...base, appType: 'mobile', idleBehavior: 'fixed' })
-    ).not.toContain('mobile-sliding-window')
+  it('does not fire for SPA', () => {
+    expect(warningIds({ ...base, appType: 'spa' })).not.toContain('mobile-token-refresh')
   })
 
-  it('does not fire for SPA + sliding window', () => {
-    expect(
-      warningIds({ ...base, appType: 'spa', idleBehavior: 'sliding' })
-    ).not.toContain('mobile-sliding-window')
+  it('does not fire for server', () => {
+    expect(warningIds({ ...base, appType: 'server' })).not.toContain('mobile-token-refresh')
   })
 })
 
@@ -134,61 +127,36 @@ describe('warning: m2m-hipaa', () => {
   })
 })
 
-// ── high-sliding-no-absolute ──────────────────────────────────────────────
+// ── high-no-absolute ──────────────────────────────────────────────────────
 
-describe('warning: high-sliding-no-absolute', () => {
-  it('fires for high sensitivity + sliding window', () => {
-    expect(
-      warningIds({ ...base, sensitivityTier: 'high', idleBehavior: 'sliding' })
-    ).toContain('high-sliding-no-absolute')
+describe('warning: high-no-absolute', () => {
+  it('fires for high sensitivity non-M2M', () => {
+    expect(warningIds({ ...base, sensitivityTier: 'high' })).toContain('high-no-absolute')
   })
 
-  it('does not fire for high sensitivity + fixed expiry', () => {
-    expect(
-      warningIds({ ...base, sensitivityTier: 'high', idleBehavior: 'fixed' })
-    ).not.toContain('high-sliding-no-absolute')
+  it('does not fire for medium sensitivity', () => {
+    expect(warningIds({ ...base, sensitivityTier: 'medium' })).not.toContain('high-no-absolute')
   })
 
-  it('does not fire for medium sensitivity + sliding window', () => {
+  it('does not fire for M2M with high sensitivity', () => {
     expect(
-      warningIds({ ...base, sensitivityTier: 'medium', idleBehavior: 'sliding' })
-    ).not.toContain('high-sliding-no-absolute')
+      warningIds({ appType: 'm2m', sensitivityTier: 'high', complianceFramework: 'none', tokenBinding: 'none' })
+    ).not.toContain('high-no-absolute')
   })
 })
 
-// ── revocation advisory — now in warnings, not disclaimer ─────────────────
+// ── disclaimer ────────────────────────────────────────────────────────────
 
-describe('revocation advisory', () => {
-  it('no-revocation id is not in warnings (old id retired)', () => {
-    expect(warningIds(base)).not.toContain('no-revocation')
-    expect(warningIds({ ...base, appType: 'm2m' })).not.toContain('no-revocation')
-  })
-
-  it('token-revocation advisory is in warnings, not disclaimer', () => {
-    expect(computePolicy(base).warnings.some((w) => w.id === 'token-revocation')).toBe(true)
-    expect(computePolicy(base).disclaimer.some((d) => d.includes('RFC 7009'))).toBe(false)
-  })
-
-  it('disclaimer always contains the base boilerplate', () => {
+describe('disclaimer', () => {
+  it('always contains the base boilerplate', () => {
     expect(computePolicy(base).disclaimer.some((d) => d.includes('NIST SP 800-63B Rev 4'))).toBe(true)
   })
 
-  it('token-revocation advisory applies to M2M as well', () => {
-    expect(
-      computePolicy({ ...base, appType: 'm2m' }).warnings.some((w) => w.id === 'token-revocation')
-    ).toBe(true)
+  it('contains RFC 7009 revocation note', () => {
+    expect(computePolicy(base).disclaimer.some((d) => d.includes('RFC 7009'))).toBe(true)
   })
 })
 
-// ── high-sliding-no-absolute: M2M defensive ───────────────────────────────
-
-describe('warning: high-sliding-no-absolute — M2M', () => {
-  it('does not fire for M2M with high sensitivity (idleBehavior not set)', () => {
-    expect(
-      warningIds({ appType: 'm2m', sensitivityTier: 'high', complianceFramework: 'none', tokenBinding: 'none' })
-    ).not.toContain('high-sliding-no-absolute')
-  })
-})
 
 // ── refresh token fields ───────────────────────────────────────────────────
 
@@ -484,24 +452,6 @@ describe('accessTokenLifetime upgradeNote', () => {
   })
 })
 
-// ── token-revocation advisory ─────────────────────────────────────────────
-
-describe('token-revocation advisory', () => {
-  it('present in warnings for standard inputs', () => {
-    expect(computePolicy(base).warnings.some((w) => w.id === 'token-revocation')).toBe(true)
-  })
-
-  it('kind is advisory', () => {
-    const w = computePolicy(base).warnings.find((w) => w.id === 'token-revocation')
-    expect(w?.kind).toBe('advisory')
-  })
-
-  it('present for M2M as well', () => {
-    expect(
-      computePolicy({ ...base, appType: 'm2m' }).warnings.some((w) => w.id === 'token-revocation')
-    ).toBe(true)
-  })
-})
 
 // ── deferred warnings do not fire for standard inputs ─────────────────────
 

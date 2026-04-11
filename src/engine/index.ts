@@ -76,7 +76,7 @@ const SENSITIVITY_LABEL: Record<SensitivityTier, string> = {
 }
 
 const COMPLIANCE_LABEL: Partial<Record<ComplianceFramework, string>> = {
-  hipaa: 'HIPAA community practice',
+  hipaa: 'HIPAA industry practice',
   'fedramp-moderate': 'FedRAMP Moderate compliance controls',
   'fedramp-high': 'FedRAMP High compliance controls',
 }
@@ -123,6 +123,7 @@ function computeAccessTokenLifetime(inputs: PolicyInputs): NumericRecommendation
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor:
       'No specific value mandated. RFC 9700 §4.14.2 recommends short-lived access tokens combined with refresh tokens.',
@@ -172,6 +173,7 @@ function computeRefreshTokenLifetime(inputs: PolicyInputs): NumericRecommendatio
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor:
       'No specific value mandated. RFC 6749 §10.4 recommends limiting refresh token lifetime.',
@@ -198,15 +200,15 @@ function computeAbsoluteSessionLimit(inputs: PolicyInputs): NumericRecommendatio
   const label = isComplianceBinding ? COMPLIANCE_LABEL[complianceFramework]! : rawLabel
 
   const sensitivityFloorMap: Record<SensitivityTier, string> = {
-    low: 'Community practice. NIST SP 800-63B Rev 4 AAL1: session limit SHALL be established; SHOULD ≤30 days.',
+    low: 'Industry practice. NIST SP 800-63B Rev 4 AAL1: session limit SHALL be established; SHOULD ≤30 days.',
     medium:
       'NIST SP 800-63B Rev 4 AAL2: SHALL establish; SHOULD ≤24h. Recommendation is stricter at 12h — aligned with Rev 3 AAL2 SHALL.',
-    high: 'Community practice — stricter than AAL2 24h SHOULD, aligned with AAL3 12h SHALL as a conservative target.',
+    high: 'Industry practice — stricter than AAL2 24h SHOULD, aligned with AAL3 12h SHALL as a conservative target.',
   }
   // Keyed on ComplianceFramework to avoid silent breakage if COMPLIANCE_LABEL strings change.
   const complianceFloorMap: Partial<Record<ComplianceFramework, string>> = {
     hipaa:
-      'Community practice for ePHI access environments. HIPAA §164.312(a)(2)(iii) requires automatic logoff — no specific numeric value mandated.',
+      'Industry practice for ePHI access environments. HIPAA §164.312(a)(2)(iii) requires automatic logoff — no specific numeric value mandated.',
     'fedramp-moderate':
       'NIST SP 800-63B Rev 4 AAL2: SHALL establish; SHOULD ≤24h. Recommendation is stricter at 12h — aligned with Rev 3 AAL2 SHALL.',
     'fedramp-high': 'NIST SP 800-63B Rev 4 AAL3: SHALL ≤12h.',
@@ -217,6 +219,7 @@ function computeAbsoluteSessionLimit(inputs: PolicyInputs): NumericRecommendatio
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor,
   }
@@ -241,7 +244,7 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
   const label = isComplianceBinding ? COMPLIANCE_LABEL[complianceFramework]! : rawLabel
 
   const sensitivityFloorMap: Record<SensitivityTier, string> = {
-    low: 'Community practice. NIST SP 800-63B Rev 4 AAL1: inactivity timeout is optional (MAY).',
+    low: 'Industry practice. NIST SP 800-63B Rev 4 AAL1: inactivity timeout is optional (MAY).',
     medium:
       'NIST SP 800-63B Rev 4 AAL2: inactivity timeout SHOULD ≤60 min. Recommendation is stricter at 30 min — aligned with Rev 3 AAL2 SHALL 30 min.',
     high: 'NIST SP 800-63B Rev 4 AAL3: inactivity timeout SHOULD ≤15 min.',
@@ -249,7 +252,7 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
   // Keyed on ComplianceFramework to avoid silent breakage if COMPLIANCE_LABEL strings change.
   const complianceFloorMap: Partial<Record<ComplianceFramework, string>> = {
     hipaa:
-      'Community practice. HIPAA §164.312(a)(2)(iii) automatic logoff is addressable — no specific numeric value mandated. 15 min is industry standard for clinical environments.',
+      'Industry practice. HIPAA §164.312(a)(2)(iii) automatic logoff is addressable — no specific numeric value mandated. 15 min is industry standard for clinical environments.',
     'fedramp-moderate':
       'NIST SP 800-63B Rev 4 AAL2: inactivity timeout SHOULD ≤60 min. SC-10 mandates inactivity disconnect — 30 min aligned with NIST Rev 3 AAL2 SHALL 30 min.',
     'fedramp-high':
@@ -258,6 +261,7 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor:
       (isComplianceBinding ? complianceFloorMap[complianceFramework] : undefined) ??
@@ -275,7 +279,6 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     refreshTokenUsage,
     sensitivityTier,
     tokenBinding,
-    idleBehavior,
   } = inputs
 
   // SPA + FedRAMP High
@@ -310,14 +313,13 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     })
   }
 
-  // Mobile + sliding window
-  // iOS background suspension can interrupt token refresh
-  if (appType === 'mobile' && idleBehavior === 'sliding') {
+  // Mobile — iOS background suspension can interrupt token refresh
+  if (appType === 'mobile') {
     warnings.push({
-      id: 'mobile-sliding-window',
-      kind: 'conditional',
+      id: 'mobile-token-refresh',
+      kind: 'advisory',
       message:
-        'iOS aggressively suspends background processes, which can interrupt token refresh and cause unexpected session termination. Validate token refresh behavior against OWASP MASTG and platform-specific guidance before relying on sliding window behavior.',
+        'iOS aggressively suspends background processes, which can interrupt token refresh and cause unexpected session termination. Validate token refresh behavior against OWASP MASTG and platform-specific guidance.',
     })
   }
 
@@ -332,15 +334,14 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     })
   }
 
-  // High sensitivity + sliding window
-  // Sliding window alone is insufficient at high sensitivity — NIST 800-63B requires both
-  // inactivity timeout and absolute session limit at AAL2+
-  if (sensitivityTier === 'high' && idleBehavior === 'sliding') {
+  // High sensitivity — verify IdP enforces both idle timeout and absolute session limit
+  // NIST 800-63B Rev 4 mandates an absolute session limit at AAL2+ (SHALL)
+  if (sensitivityTier === 'high' && appType !== 'm2m') {
     warnings.push({
-      id: 'high-sliding-no-absolute',
-      kind: 'conditional',
+      id: 'high-no-absolute',
+      kind: 'advisory',
       message:
-        'Idle timeout alone is insufficient at high sensitivity. An attacker with a hijacked session can generate periodic activity to prevent the idle timeout from firing indefinitely. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL) and recommends an inactivity timeout (SHOULD) — both should be applied. Add an absolute session limit.',
+        'Both an idle timeout and an absolute session limit are recommended above. Verify your IdP enforces both — an idle timeout alone is insufficient because an attacker with a hijacked session can generate activity to prevent it from firing. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL).',
     })
   }
 
@@ -402,7 +403,7 @@ function assembleCitations(inputs: PolicyInputs): PolicyCitation[] {
     field: 'accessTokenLifetime',
     standard: 'RFC 9700',
     clause: '§4.14.2',
-    note: 'Short-lived access tokens combined with refresh tokens. No specific numeric value mandated — recommendation reflects community practice by app type, sensitivity, and compliance framework.',
+    note: 'Short-lived access tokens combined with refresh tokens. No specific numeric value mandated — recommendation reflects industry practice by app type, sensitivity, and compliance framework.',
   })
   citations.push({
     field: 'accessTokenLifetime',
@@ -538,7 +539,10 @@ const BASE_DISCLAIMER =
   'Recommendations are grounded in NIST SP 800-63B Rev 4, RFC 9700, RFC 6749, RFC 9068, and draft-ietf-oauth-browser-based-apps-26 — not a compliance determination or substitute for a security review. Verify against your ATO, organizational requirements, or legal counsel. Standards basis last verified: March 2026.'
 
 function buildDisclaimer(): string[] {
-  return [BASE_DISCLAIMER]
+  return [
+    BASE_DISCLAIMER,
+    'Token revocation (RFC 7009): many authorization servers return HTTP 200 on access token revocation but do not maintain a denylist — the token remains valid until expiry. Verify your AS behavior. For access tokens, lifetime is the effective revocation window.',
+  ]
 }
 
 // ── computePolicy ───────────────────────────────────────────────────────────
@@ -588,7 +592,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     refreshTokenRotation = {
       value: 'recommended',
       rationale: isHighAssurance
-        ? 'Defense-in-depth at high assurance. Community practice in regulated environments.'
+        ? 'Defense-in-depth at high assurance. Industry practice in regulated environments.'
         : 'Additional protection — not required by RFC 9700 §2.2.2 for confidential clients.',
       standardsFloor: 'RFC 9700 §2.2.2 does not require rotation for confidential clients.',
     }
@@ -617,7 +621,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     m2m: {
       recommendation:
         'Server-side secret store (vault, secrets manager, or environment variables with restricted access). Never in source code or client-accessible config.',
-      rationale: 'Community practice for client credentials management.',
+      rationale: 'Industry practice for client credentials management.',
       upgradeNote:
         'Prefer a dedicated secrets manager (HashiCorp Vault, AWS Secrets Manager) over environment variables for rotation and audit trail support.',
     },
@@ -634,15 +638,6 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     ...detectComputedWarnings(inputs, computed),
   ]
 
-  const advisories: PolicyWarning[] = [
-    {
-      id: 'token-revocation',
-      kind: 'advisory',
-      message:
-        'Verify your authorization server supports and enforces RFC 7009 token revocation. Without revocation, compromised tokens remain valid until expiry.',
-    },
-  ]
-
   const reAuth = buildReAuthTriggers(inputs, computed.absoluteSession, computed.idleTimeout)
   const citations = assembleCitations(inputs)
 
@@ -656,7 +651,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     tokenStorage: tokenStorageMap[appType],
     reAuthTriggersIdp: reAuth.idp,
     reAuthTriggersApp: reAuth.app,
-    warnings: [...conditionalWarnings, ...advisories],
+    warnings: conditionalWarnings,
     citations,
     disclaimer: buildDisclaimer(),
   }
