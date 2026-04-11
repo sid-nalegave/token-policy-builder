@@ -535,7 +535,10 @@ const BASE_DISCLAIMER =
   'Recommendations are grounded in NIST SP 800-63B Rev 4, RFC 9700, RFC 6749, RFC 9068, and draft-ietf-oauth-browser-based-apps-26 — not a compliance determination or substitute for a security review. Verify against your ATO, organizational requirements, or legal counsel. Standards basis last verified: March 2026.'
 
 function buildDisclaimer(): string[] {
-  return [BASE_DISCLAIMER]
+  return [
+    BASE_DISCLAIMER,
+    'Token revocation (RFC 7009): many authorization servers return HTTP 200 on access token revocation but do not maintain a denylist — the token remains valid until expiry. Verify your AS behavior. For access tokens, lifetime is the effective revocation window.',
+  ]
 }
 
 // ── computePolicy ───────────────────────────────────────────────────────────
@@ -631,15 +634,6 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     ...detectComputedWarnings(inputs, computed),
   ]
 
-  const advisories: PolicyWarning[] = [
-    {
-      id: 'token-revocation',
-      kind: 'advisory',
-      message:
-        'Verify your authorization server supports and enforces RFC 7009 token revocation. Without revocation, compromised tokens remain valid until expiry.',
-    },
-  ]
-
   const reAuth = buildReAuthTriggers(inputs, computed.absoluteSession, computed.idleTimeout)
   const citations = assembleCitations(inputs)
 
@@ -653,7 +647,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     tokenStorage: tokenStorageMap[appType],
     reAuthTriggersIdp: reAuth.idp,
     reAuthTriggersApp: reAuth.app,
-    warnings: [...conditionalWarnings, ...advisories],
+    warnings: conditionalWarnings,
     citations,
     disclaimer: buildDisclaimer(),
   }

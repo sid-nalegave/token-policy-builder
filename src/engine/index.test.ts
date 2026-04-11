@@ -145,27 +145,15 @@ describe('warning: high-no-absolute', () => {
   })
 })
 
-// ── revocation advisory — now in warnings, not disclaimer ─────────────────
+// ── disclaimer ────────────────────────────────────────────────────────────
 
-describe('revocation advisory', () => {
-  it('no-revocation id is not in warnings (old id retired)', () => {
-    expect(warningIds(base)).not.toContain('no-revocation')
-    expect(warningIds({ ...base, appType: 'm2m' })).not.toContain('no-revocation')
-  })
-
-  it('token-revocation advisory is in warnings, not disclaimer', () => {
-    expect(computePolicy(base).warnings.some((w) => w.id === 'token-revocation')).toBe(true)
-    expect(computePolicy(base).disclaimer.some((d) => d.includes('RFC 7009'))).toBe(false)
-  })
-
-  it('disclaimer always contains the base boilerplate', () => {
+describe('disclaimer', () => {
+  it('always contains the base boilerplate', () => {
     expect(computePolicy(base).disclaimer.some((d) => d.includes('NIST SP 800-63B Rev 4'))).toBe(true)
   })
 
-  it('token-revocation advisory applies to M2M as well', () => {
-    expect(
-      computePolicy({ ...base, appType: 'm2m' }).warnings.some((w) => w.id === 'token-revocation')
-    ).toBe(true)
+  it('contains RFC 7009 revocation note', () => {
+    expect(computePolicy(base).disclaimer.some((d) => d.includes('RFC 7009'))).toBe(true)
   })
 })
 
@@ -464,24 +452,6 @@ describe('accessTokenLifetime upgradeNote', () => {
   })
 })
 
-// ── token-revocation advisory ─────────────────────────────────────────────
-
-describe('token-revocation advisory', () => {
-  it('present in warnings for standard inputs', () => {
-    expect(computePolicy(base).warnings.some((w) => w.id === 'token-revocation')).toBe(true)
-  })
-
-  it('kind is advisory', () => {
-    const w = computePolicy(base).warnings.find((w) => w.id === 'token-revocation')
-    expect(w?.kind).toBe('advisory')
-  })
-
-  it('present for M2M as well', () => {
-    expect(
-      computePolicy({ ...base, appType: 'm2m' }).warnings.some((w) => w.id === 'token-revocation')
-    ).toBe(true)
-  })
-})
 
 // ── deferred warnings do not fire for standard inputs ─────────────────────
 
