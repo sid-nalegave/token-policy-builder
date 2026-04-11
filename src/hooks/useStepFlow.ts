@@ -87,6 +87,12 @@ export function useStepFlow() {
 
   const canGoBack = findNextUnskipped(currentStepIndex, -1, inputs) !== null
 
+  const reset = useCallback(() => {
+    setInputs({})
+    setCurrentStepIndex(0)
+    setDirection(1)
+  }, [])
+
   return {
     currentStepIndex,
     inputs,
@@ -98,6 +104,7 @@ export function useStepFlow() {
     goToStep,
     isComplete,
     canGoBack,
+    reset,
     totalSteps: STEP_CONFIGS.length,
   }
 }

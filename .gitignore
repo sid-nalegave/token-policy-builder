@@ -32,3 +32,6 @@ docs/policy-engine-numeric-values.md
 *.log
 npm-debug.log*
 yarn-debug.log*
+
+# playwright-mcp
+.playwright-mcp/

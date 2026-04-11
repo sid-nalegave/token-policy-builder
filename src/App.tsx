@@ -1,9 +1,13 @@
+import { useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useStepFlow } from '@/hooks/useStepFlow'
 import { STEP_CONFIGS } from '@/data/stepConfigs'
 import { StepperSidebar } from '@/components/StepperSidebar'
 import { StepQuestion } from '@/components/StepQuestion'
 import { StepNavigator } from '@/components/StepNavigator'
+import { ResultCard } from '@/components/ResultCard'
+import { computePolicy } from '@/engine'
+import type { PolicyInputs } from '@/engine/types'
 
 const variants = {
   enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
@@ -23,7 +27,13 @@ function App() {
     goToStep,
     isComplete,
     canGoBack,
+    reset,
   } = useStepFlow()
+
+  const result = useMemo(
+    () => (isComplete ? computePolicy(inputs as PolicyInputs) : null),
+    [inputs, isComplete]
+  )
 
   const currentValue = inputs[currentStep.id]
   const showNext = currentValue !== undefined
@@ -44,15 +54,12 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
-        {isComplete ? (
-          <div className="rounded-xl border border-border bg-card p-10 text-center shadow-sm">
-            <p className="text-xl font-semibold tracking-display">
-              Assessment complete
-            </p>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Policy recommendation will appear here.
-            </p>
-          </div>
+        {isComplete && result ? (
+          <ResultCard
+            result={result}
+            inputs={inputs}
+            onReset={reset}
+          />
         ) : (
           <div className="rounded-xl border border-border bg-card shadow-sm">
             {/* Mobile: step indicator above content */}

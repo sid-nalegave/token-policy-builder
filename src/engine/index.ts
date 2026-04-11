@@ -572,7 +572,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     refreshTokenRotation = {
       value: bindingRationale ? 'recommended' : 'required',
       rationale:
-        bindingRationale ?? 'No sender-constraining configured — rotation satisfies the public client requirement.',
+        bindingRationale ?? 'Rotation required for public clients (RFC 9700 §2.2.2).',
       standardsFloor:
         'RFC 9700 §2.2.2: refresh tokens for public clients MUST be sender-constrained or use rotation.',
     }
