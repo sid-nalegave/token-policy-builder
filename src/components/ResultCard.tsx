@@ -88,11 +88,11 @@ export function ResultCard({ result, inputs, onReset, onEdit }: ResultCardProps)
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="default" size="sm" onClick={handleCopy} className="gap-1.5">
             {copied ? <Check size={13} /> : <Copy size={13} />}
-            {copied ? 'Copied' : 'Copy policy'}
+            <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy policy'}</span>
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportJSON} className="gap-1.5">
             <Download size={13} />
-            Export JSON
+            <span className="hidden sm:inline">Export JSON</span>
           </Button>
         </div>
       </div>
