@@ -35,4 +35,4 @@ yarn-debug.log*
 
 # playwright-mcp
 .playwright-mcp/
-*.png
+/*.png
