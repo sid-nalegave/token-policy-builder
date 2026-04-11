@@ -10,7 +10,6 @@ const base: PolicyInputs = {
   sensitivityTier: 'low',
   complianceFramework: 'none',
   refreshTokenUsage: 'no',
-  idleBehavior: 'fixed',
   tokenBinding: 'none',
 }
 
@@ -90,25 +89,19 @@ describe('warning: spa-high-no-binding', () => {
   })
 })
 
-// ── mobile-sliding-window ─────────────────────────────────────────────────
+// ── mobile-token-refresh ──────────────────────────────────────────────────
 
-describe('warning: mobile-sliding-window', () => {
-  it('fires for mobile + sliding window', () => {
-    expect(
-      warningIds({ ...base, appType: 'mobile', idleBehavior: 'sliding' })
-    ).toContain('mobile-sliding-window')
+describe('warning: mobile-token-refresh', () => {
+  it('fires for any mobile app', () => {
+    expect(warningIds({ ...base, appType: 'mobile' })).toContain('mobile-token-refresh')
   })
 
-  it('does not fire for mobile + fixed expiry', () => {
-    expect(
-      warningIds({ ...base, appType: 'mobile', idleBehavior: 'fixed' })
-    ).not.toContain('mobile-sliding-window')
+  it('does not fire for SPA', () => {
+    expect(warningIds({ ...base, appType: 'spa' })).not.toContain('mobile-token-refresh')
   })
 
-  it('does not fire for SPA + sliding window', () => {
-    expect(
-      warningIds({ ...base, appType: 'spa', idleBehavior: 'sliding' })
-    ).not.toContain('mobile-sliding-window')
+  it('does not fire for server', () => {
+    expect(warningIds({ ...base, appType: 'server' })).not.toContain('mobile-token-refresh')
   })
 })
 
@@ -134,25 +127,21 @@ describe('warning: m2m-hipaa', () => {
   })
 })
 
-// ── high-sliding-no-absolute ──────────────────────────────────────────────
+// ── high-no-absolute ──────────────────────────────────────────────────────
 
-describe('warning: high-sliding-no-absolute', () => {
-  it('fires for high sensitivity + sliding window', () => {
-    expect(
-      warningIds({ ...base, sensitivityTier: 'high', idleBehavior: 'sliding' })
-    ).toContain('high-sliding-no-absolute')
+describe('warning: high-no-absolute', () => {
+  it('fires for high sensitivity non-M2M', () => {
+    expect(warningIds({ ...base, sensitivityTier: 'high' })).toContain('high-no-absolute')
   })
 
-  it('does not fire for high sensitivity + fixed expiry', () => {
-    expect(
-      warningIds({ ...base, sensitivityTier: 'high', idleBehavior: 'fixed' })
-    ).not.toContain('high-sliding-no-absolute')
+  it('does not fire for medium sensitivity', () => {
+    expect(warningIds({ ...base, sensitivityTier: 'medium' })).not.toContain('high-no-absolute')
   })
 
-  it('does not fire for medium sensitivity + sliding window', () => {
+  it('does not fire for M2M with high sensitivity', () => {
     expect(
-      warningIds({ ...base, sensitivityTier: 'medium', idleBehavior: 'sliding' })
-    ).not.toContain('high-sliding-no-absolute')
+      warningIds({ appType: 'm2m', sensitivityTier: 'high', complianceFramework: 'none', tokenBinding: 'none' })
+    ).not.toContain('high-no-absolute')
   })
 })
 
@@ -180,15 +169,6 @@ describe('revocation advisory', () => {
   })
 })
 
-// ── high-sliding-no-absolute: M2M defensive ───────────────────────────────
-
-describe('warning: high-sliding-no-absolute — M2M', () => {
-  it('does not fire for M2M with high sensitivity (idleBehavior not set)', () => {
-    expect(
-      warningIds({ appType: 'm2m', sensitivityTier: 'high', complianceFramework: 'none', tokenBinding: 'none' })
-    ).not.toContain('high-sliding-no-absolute')
-  })
-})
 
 // ── refresh token fields ───────────────────────────────────────────────────
 

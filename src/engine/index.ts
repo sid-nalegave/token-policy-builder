@@ -275,7 +275,6 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     refreshTokenUsage,
     sensitivityTier,
     tokenBinding,
-    idleBehavior,
   } = inputs
 
   // SPA + FedRAMP High
@@ -310,14 +309,13 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     })
   }
 
-  // Mobile + sliding window
-  // iOS background suspension can interrupt token refresh
-  if (appType === 'mobile' && idleBehavior === 'sliding') {
+  // Mobile — iOS background suspension can interrupt token refresh
+  if (appType === 'mobile') {
     warnings.push({
-      id: 'mobile-sliding-window',
-      kind: 'conditional',
+      id: 'mobile-token-refresh',
+      kind: 'advisory',
       message:
-        'iOS aggressively suspends background processes, which can interrupt token refresh and cause unexpected session termination. Validate token refresh behavior against OWASP MASTG and platform-specific guidance before relying on sliding window behavior.',
+        'iOS aggressively suspends background processes, which can interrupt token refresh and cause unexpected session termination. Validate token refresh behavior against OWASP MASTG and platform-specific guidance.',
     })
   }
 
@@ -332,15 +330,14 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     })
   }
 
-  // High sensitivity + sliding window
-  // Sliding window alone is insufficient at high sensitivity — NIST 800-63B requires both
-  // inactivity timeout and absolute session limit at AAL2+
-  if (sensitivityTier === 'high' && idleBehavior === 'sliding') {
+  // High sensitivity — both idle timeout and absolute session limit required
+  // NIST 800-63B Rev 4 mandates an absolute session limit at AAL2+ (SHALL)
+  if (sensitivityTier === 'high' && appType !== 'm2m') {
     warnings.push({
-      id: 'high-sliding-no-absolute',
-      kind: 'conditional',
+      id: 'high-no-absolute',
+      kind: 'advisory',
       message:
-        'Idle timeout alone is insufficient at high sensitivity. An attacker with a hijacked session can generate periodic activity to prevent the idle timeout from firing indefinitely. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL) and recommends an inactivity timeout (SHOULD) — both should be applied. Add an absolute session limit.',
+        'At high sensitivity, apply both an idle timeout and an absolute session limit. An idle timeout alone is insufficient — an attacker with a hijacked session can generate activity to prevent it from firing. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL).',
     })
   }
 

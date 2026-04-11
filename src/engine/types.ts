@@ -10,7 +10,6 @@ export type ComplianceFramework =
   | 'fedramp-moderate'
   | 'fedramp-high'
 export type RefreshTokenUsage = 'yes' | 'no'
-export type IdleSessionBehavior = 'sliding' | 'fixed'
 export type TokenBinding = 'none' | 'dpop' | 'mtls'
 
 export interface PolicyInputs {
@@ -19,7 +18,6 @@ export interface PolicyInputs {
   sensitivityTier?: SensitivityTier
   complianceFramework?: ComplianceFramework
   refreshTokenUsage?: RefreshTokenUsage
-  idleBehavior?: IdleSessionBehavior
   tokenBinding?: TokenBinding
 }
 

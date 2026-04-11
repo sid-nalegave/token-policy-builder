@@ -44,7 +44,7 @@ function App() {
       <header className="border-b border-border bg-background">
         <div className="mx-auto max-w-4xl px-5 py-5 sm:px-8 sm:py-6">
           <h1 className="text-lg font-semibold tracking-display text-foreground sm:text-xl">
-            Token Policy
+            OAuth Token Policy
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Get token lifetime and session policy recommendations with NIST and RFC citations.

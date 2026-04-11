@@ -153,29 +153,6 @@ export const STEP_CONFIGS: StepConfig[] = [
     skipReason: 'Not applicable for machine-to-machine flows',
   },
   {
-    id: 'idleBehavior',
-    label: 'Idle session behavior',
-    question: 'How should idle sessions behave?',
-    tooltip:
-      'Sliding window resets the inactivity timer on each user action — the session stays alive as long as the user is active. Fixed expiry terminates the session at a hard deadline regardless of activity. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL) and recommends an inactivity timeout (SHOULD) — they are complementary, not alternatives. HIPAA automatic logoff is addressable, not required, and specifies no numeric value.',
-    options: [
-      {
-        value: 'sliding',
-        label: 'Sliding window',
-        description:
-          'Inactivity timer resets on each user action.',
-      },
-      {
-        value: 'fixed',
-        label: 'Fixed expiry',
-        description:
-          'Session terminates at a hard deadline regardless of activity.',
-      },
-    ],
-    skippable: isM2M,
-    skipReason: 'Not applicable for machine-to-machine flows',
-  },
-  {
     id: 'tokenBinding',
     label: 'Token binding',
     question: 'What sender-constraining mechanism will you use?',
