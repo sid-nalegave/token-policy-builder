@@ -102,26 +102,29 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
             <>
               <div className="border-t border-border my-6" />
 
-              <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col">
-                {result.absoluteSessionLimit !== null && (
-                  <PolicyField
-                    label="Absolute session limit"
-                    field={result.absoluteSessionLimit}
-                  />
-                )}
-                {result.idleTimeoutIdp !== null && (
-                  <PolicyField
-                    label="Idle timeout — IdP"
-                    field={result.idleTimeoutIdp}
-                  />
-                )}
-                {result.idleTimeoutApp !== null && (
-                  <PolicyField
-                    label="Idle timeout — application"
-                    field={result.idleTimeoutApp}
-                  />
-                )}
-              </div>
+              {result.absoluteSessionLimit !== null && (
+                <PolicyField
+                  label="Absolute session limit"
+                  field={result.absoluteSessionLimit}
+                />
+              )}
+
+              {(result.idleTimeoutIdp !== null || result.idleTimeoutApp !== null) && (
+                <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col mt-6">
+                  {result.idleTimeoutIdp !== null && (
+                    <PolicyField
+                      label="Idle timeout — IdP"
+                      field={result.idleTimeoutIdp}
+                    />
+                  )}
+                  {result.idleTimeoutApp !== null && (
+                    <PolicyField
+                      label="Idle timeout — application"
+                      field={result.idleTimeoutApp}
+                    />
+                  )}
+                </div>
+              )}
 
               {isFedRAMP && (
                 <UpgradeNote note={FEDRAMP_VERSION_NOTE} />
