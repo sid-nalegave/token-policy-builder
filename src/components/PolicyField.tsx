@@ -9,8 +9,7 @@ interface PolicyFieldProps {
 }
 
 export function PolicyField({ label, field, dominantDriver }: PolicyFieldProps) {
-  const driver = field.rationale.replace(' drives this value.', '')
-  const showDriver = driver !== dominantDriver
+  const showDriver = field.driver !== dominantDriver
 
   return (
     <div className="flex flex-col">
@@ -21,7 +20,7 @@ export function PolicyField({ label, field, dominantDriver }: PolicyFieldProps) 
         {formatMinutes(field.value)}
       </span>
       {showDriver && (
-        <span className="text-xs text-muted-foreground mt-0.5">{driver}</span>
+        <span className="text-xs text-muted-foreground mt-0.5">{field.driver}</span>
       )}
       <UpgradeNote note={field.upgradeNote} />
     </div>

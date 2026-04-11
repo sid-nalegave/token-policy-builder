@@ -31,6 +31,8 @@ export interface PolicyInputs {
 export interface NumericRecommendation {
   /** Recommended value in minutes */
   value: number
+  /** The primary driver label — the factor that determined this value */
+  driver: string
   /** Why this value was chosen — cites standard clause or community practice */
   rationale: string
   /** Standards floor annotation — exact clause, or "No specific value mandated" */

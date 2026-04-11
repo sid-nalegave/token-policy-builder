@@ -16,9 +16,9 @@ export function FieldCitations({ citations }: FieldCitationsProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
       >
-        <span className="font-mono uppercase tracking-label">Standards references</span>
+        <span className="font-mono uppercase tracking-label">Standards references ({citations.length})</span>
         {open ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
       </button>
       {open && (

@@ -11,7 +11,7 @@ const WARNING_TITLES: Record<string, string> = {
   'spa-high-no-binding': 'Bearer token theft risk',
   'mobile-token-refresh': 'Mobile token refresh reliability',
   'm2m-hipaa': 'HIPAA applies to M2M access',
-  'high-no-absolute': 'Idle timeout insufficient alone',
+  'high-no-absolute': 'Verify IdP enforces both session controls',
   'consumer-rt-30d': 'Long-lived consumer refresh tokens',
   'idle-exceeds-absolute': 'Idle timeout exceeds session limit',
 }

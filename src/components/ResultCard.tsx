@@ -58,7 +58,6 @@ export function ResultCard({ result, inputs, onReset, onEdit }: ResultCardProps)
   const citeFor = (field: string) => result.citations.filter((c) => c.field === field)
 
   // Compute dominant driver across all numeric fields to show once at section level
-  const getDriver = (rationale: string) => rationale.replace(' drives this value.', '')
   const numericFields = [
     result.accessTokenLifetime,
     ...(!isM2M && result.refreshTokenLifetime ? [result.refreshTokenLifetime] : []),
@@ -67,8 +66,7 @@ export function ResultCard({ result, inputs, onReset, onEdit }: ResultCardProps)
     ...(!isM2M && result.idleTimeoutApp ? [result.idleTimeoutApp] : []),
   ]
   const driverCounts = numericFields.reduce<Record<string, number>>((acc, f) => {
-    const d = getDriver(f.rationale)
-    acc[d] = (acc[d] ?? 0) + 1
+    acc[f.driver] = (acc[f.driver] ?? 0) + 1
     return acc
   }, {})
   const [topDriver, topCount] = Object.entries(driverCounts).sort(([, a], [, b]) => b - a)[0]
@@ -198,7 +196,7 @@ export function ResultCard({ result, inputs, onReset, onEdit }: ResultCardProps)
         {/* Disclaimer */}
         <div className="flex flex-col gap-2 pt-2 border-t border-border">
           {result.disclaimer.map((p, i) => (
-            <p key={i} className="text-xs text-muted-foreground/70 leading-relaxed">
+            <p key={i} className="text-xs text-muted-foreground leading-relaxed">
               {p}
             </p>
           ))}

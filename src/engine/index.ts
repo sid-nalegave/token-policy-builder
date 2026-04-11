@@ -123,6 +123,7 @@ function computeAccessTokenLifetime(inputs: PolicyInputs): NumericRecommendation
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor:
       'No specific value mandated. RFC 9700 §4.14.2 recommends short-lived access tokens combined with refresh tokens.',
@@ -172,6 +173,7 @@ function computeRefreshTokenLifetime(inputs: PolicyInputs): NumericRecommendatio
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor:
       'No specific value mandated. RFC 6749 §10.4 recommends limiting refresh token lifetime.',
@@ -217,6 +219,7 @@ function computeAbsoluteSessionLimit(inputs: PolicyInputs): NumericRecommendatio
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor,
   }
@@ -258,6 +261,7 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
 
   return {
     value,
+    driver: label,
     rationale: `${label} drives this value.`,
     standardsFloor:
       (isComplianceBinding ? complianceFloorMap[complianceFramework] : undefined) ??
@@ -330,14 +334,14 @@ function detectWarnings(inputs: PolicyInputs): PolicyWarning[] {
     })
   }
 
-  // High sensitivity — both idle timeout and absolute session limit required
+  // High sensitivity — verify IdP enforces both idle timeout and absolute session limit
   // NIST 800-63B Rev 4 mandates an absolute session limit at AAL2+ (SHALL)
   if (sensitivityTier === 'high' && appType !== 'm2m') {
     warnings.push({
       id: 'high-no-absolute',
       kind: 'advisory',
       message:
-        'At high sensitivity, apply both an idle timeout and an absolute session limit. An idle timeout alone is insufficient — an attacker with a hijacked session can generate activity to prevent it from firing. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL).',
+        'Both an idle timeout and an absolute session limit are recommended above. Verify your IdP enforces both — an idle timeout alone is insufficient because an attacker with a hijacked session can generate activity to prevent it from firing. NIST 800-63B Rev 4 mandates an absolute session limit at AAL2 (SHALL).',
     })
   }
 
