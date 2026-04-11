@@ -49,7 +49,7 @@ function App() {
             OAuth Token Policy
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Get token lifetime and session policy recommendations with NIST and RFC citations.
+            Token lifetime and session policy recommendations with NIST and RFC citations.
           </p>
         </div>
       </header>
