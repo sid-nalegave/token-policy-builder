@@ -26,8 +26,10 @@ function App() {
     goForward,
     goToStep,
     isComplete,
+    showResult,
     canGoBack,
     reset,
+    editInputs,
   } = useStepFlow()
 
   const result = useMemo(
@@ -53,11 +55,12 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
-        {isComplete && result ? (
+        {showResult && result ? (
           <ResultCard
             result={result}
             inputs={inputs}
             onReset={reset}
+            onEdit={editInputs}
           />
         ) : (
           <div className="rounded-xl border border-border bg-card shadow-sm">

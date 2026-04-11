@@ -29,6 +29,7 @@ export function useStepFlow() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [inputs, setInputs] = useState<PolicyInputs>({})
   const [direction, setDirection] = useState(1)
+  const [showResult, setShowResult] = useState(false)
 
   const setAnswer = useCallback(
     (stepId: keyof PolicyInputs, value: string) => {
@@ -43,6 +44,8 @@ export function useStepFlow() {
       if (next !== null) {
         setDirection(1)
         setCurrentStepIndex(next)
+      } else {
+        setShowResult(true)
       }
     },
     [inputs]
@@ -69,21 +72,23 @@ export function useStepFlow() {
     [inputs, currentStepIndex]
   )
 
-  const goForward = useCallback(() => {
-    const next = findNextUnskipped(currentStepIndex, 1, inputs)
-    if (next !== null) {
-      setDirection(1)
-      setCurrentStepIndex(next)
-    }
-  }, [currentStepIndex, inputs])
-
-  const currentStep = STEP_CONFIGS[currentStepIndex]
-
   const isComplete = useMemo(() => {
     return STEP_CONFIGS.every(
       (step) => step.skippable(inputs) || inputs[step.id] !== undefined
     )
   }, [inputs])
+
+  const goForward = useCallback(() => {
+    const next = findNextUnskipped(currentStepIndex, 1, inputs)
+    if (next !== null) {
+      setDirection(1)
+      setCurrentStepIndex(next)
+    } else if (isComplete) {
+      setShowResult(true)
+    }
+  }, [currentStepIndex, inputs, isComplete])
+
+  const currentStep = STEP_CONFIGS[currentStepIndex]
 
   const canGoBack = findNextUnskipped(currentStepIndex, -1, inputs) !== null
 
@@ -91,6 +96,13 @@ export function useStepFlow() {
     setInputs({})
     setCurrentStepIndex(0)
     setDirection(1)
+    setShowResult(false)
+  }, [])
+
+  const editInputs = useCallback(() => {
+    setShowResult(false)
+    setDirection(-1)
+    setCurrentStepIndex(0)
   }, [])
 
   return {
@@ -103,8 +115,10 @@ export function useStepFlow() {
     goForward,
     goToStep,
     isComplete,
+    showResult,
     canGoBack,
     reset,
+    editInputs,
     totalSteps: STEP_CONFIGS.length,
   }
 }

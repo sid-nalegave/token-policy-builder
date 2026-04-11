@@ -8,6 +8,7 @@ import { RotationBadge } from './RotationBadge'
 import { TokenStorageField } from './TokenStorageField'
 import { ReAuthTriggers } from './ReAuthTriggers'
 import { FieldCitations } from './FieldCitations'
+import { InputSummary } from './InputSummary'
 import { UpgradeNote } from './UpgradeNote'
 import { toPolicyStatement } from '@/lib/toPolicyStatement'
 
@@ -28,9 +29,10 @@ interface ResultCardProps {
   result: PolicyResult
   inputs: PolicyInputs
   onReset: () => void
+  onEdit: () => void
 }
 
-export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
+export function ResultCard({ result, inputs, onReset, onEdit }: ResultCardProps) {
   const [copied, setCopied] = useState(false)
   const isM2M = inputs.appType === 'm2m'
   const isFedRAMP =
@@ -96,6 +98,9 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
       </div>
 
       <div className="flex flex-col gap-6 px-6 py-6 sm:px-8">
+        {/* Input summary */}
+        <InputSummary inputs={inputs} onEdit={onEdit} />
+
         {/* Warnings */}
         {result.warnings.length > 0 && (
           <PolicyWarningBanner warnings={result.warnings} />
