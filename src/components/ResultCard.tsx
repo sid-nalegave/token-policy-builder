@@ -97,7 +97,7 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
 
             {/* Rotation — hidden for M2M or when refresh tokens not in use */}
             {!isM2M && result.refreshTokenRotation.value !== 'not-applicable' && (
-              <div className="md:col-span-2">
+              <div>
                 <RotationBadge rotation={result.refreshTokenRotation} />
                 <FieldCitations citations={citeFor('refreshTokenRotation')} />
               </div>
@@ -108,29 +108,26 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
             <>
               <div className="border-t border-border my-6" />
 
-              {result.absoluteSessionLimit !== null && (
-                <div>
-                  <PolicyField label="Absolute session limit" field={result.absoluteSessionLimit} />
-                  <FieldCitations citations={citeFor('absoluteSessionLimit')} />
-                </div>
-              )}
-
-              {(result.idleTimeoutIdp !== null || result.idleTimeoutApp !== null) && (
-                <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col mt-6">
-                  {result.idleTimeoutIdp !== null && (
-                    <div>
-                      <PolicyField label="Idle timeout — IdP" field={result.idleTimeoutIdp} />
-                      <FieldCitations citations={citeFor('idleTimeoutIdp')} />
-                    </div>
-                  )}
-                  {result.idleTimeoutApp !== null && (
-                    <div>
-                      <PolicyField label="Idle timeout — application" field={result.idleTimeoutApp} />
-                      <FieldCitations citations={citeFor('idleTimeoutApp')} />
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col">
+                {result.absoluteSessionLimit !== null && (
+                  <div>
+                    <PolicyField label="Absolute session limit" field={result.absoluteSessionLimit} />
+                    <FieldCitations citations={citeFor('absoluteSessionLimit')} />
+                  </div>
+                )}
+                {result.idleTimeoutIdp !== null && (
+                  <div>
+                    <PolicyField label="Idle timeout — IdP" field={result.idleTimeoutIdp} />
+                    <FieldCitations citations={citeFor('idleTimeoutIdp')} />
+                  </div>
+                )}
+                {result.idleTimeoutApp !== null && (
+                  <div>
+                    <PolicyField label="Idle timeout — application" field={result.idleTimeoutApp} />
+                    <FieldCitations citations={citeFor('idleTimeoutApp')} />
+                  </div>
+                )}
+              </div>
 
               {isFedRAMP && (
                 <UpgradeNote note={FEDRAMP_VERSION_NOTE} />
