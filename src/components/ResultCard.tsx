@@ -11,6 +11,16 @@ import { FieldCitations } from './FieldCitations'
 import { UpgradeNote } from './UpgradeNote'
 import { toPolicyStatement } from '@/lib/toPolicyStatement'
 
+const DRIVER_PILL_CLASSES: Record<string, string> = {
+  'High sensitivity': 'border-warning-border bg-warning text-warning-text',
+  'Medium sensitivity': 'border-info-border bg-info text-info-text',
+  'Low sensitivity': 'border-border bg-secondary text-muted-foreground',
+  'FedRAMP High compliance controls': 'border-warning-border bg-warning text-warning-text',
+  'FedRAMP Moderate compliance controls': 'border-info-border bg-info text-info-text',
+  'HIPAA industry practice': 'border-info-border bg-info text-info-text',
+}
+const DEFAULT_PILL = 'border-border bg-secondary text-muted-foreground'
+
 const FEDRAMP_VERSION_NOTE =
   'Recommendations cite NIST SP 800-63B Rev 4 (August 2025). If your ATO references Rev 3, verify — AAL2 idle timeout was 30 minutes (SHALL) under Rev 3, relaxed to 1 hour (SHOULD) in Rev 4.'
 
@@ -45,6 +55,23 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
 
   const citeFor = (field: string) => result.citations.filter((c) => c.field === field)
 
+  // Compute dominant driver across all numeric fields to show once at section level
+  const getDriver = (rationale: string) => rationale.replace(' drives this value.', '')
+  const numericFields = [
+    result.accessTokenLifetime,
+    ...(!isM2M && result.refreshTokenLifetime ? [result.refreshTokenLifetime] : []),
+    ...(!isM2M && result.absoluteSessionLimit ? [result.absoluteSessionLimit] : []),
+    ...(!isM2M && result.idleTimeoutIdp ? [result.idleTimeoutIdp] : []),
+    ...(!isM2M && result.idleTimeoutApp ? [result.idleTimeoutApp] : []),
+  ]
+  const driverCounts = numericFields.reduce<Record<string, number>>((acc, f) => {
+    const d = getDriver(f.rationale)
+    acc[d] = (acc[d] ?? 0) + 1
+    return acc
+  }, {})
+  const [topDriver, topCount] = Object.entries(driverCounts).sort(([, a], [, b]) => b - a)[0]
+  const dominantDriver = topCount >= 2 ? topDriver : undefined
+
   const showReAuth =
     !isM2M &&
     (result.reAuthTriggersIdp.length > 0 || result.reAuthTriggersApp.length > 0)
@@ -76,21 +103,28 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
 
         {/* Recommended policy */}
         <section>
-          <h3 className="text-[11px] font-medium uppercase tracking-label text-muted-foreground mb-4">
-            Recommended policy
-          </h3>
+          <div className="flex items-baseline gap-3 mb-4">
+            <h3 className="text-[11px] font-medium uppercase tracking-label text-muted-foreground">
+              Recommended policy
+            </h3>
+            {dominantDriver && (
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${DRIVER_PILL_CLASSES[dominantDriver] ?? DEFAULT_PILL}`}>
+                {dominantDriver}
+              </span>
+            )}
+          </div>
 
           <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col">
             {/* Access token — always shown */}
             <div>
-              <PolicyField label="Access token lifetime" field={result.accessTokenLifetime} />
+              <PolicyField label="Access token lifetime" field={result.accessTokenLifetime} dominantDriver={dominantDriver} />
               <FieldCitations citations={citeFor('accessTokenLifetime')} />
             </div>
 
             {/* Refresh token lifetime — hidden for M2M or when null */}
             {!isM2M && result.refreshTokenLifetime !== null && (
               <div>
-                <PolicyField label="Refresh token lifetime" field={result.refreshTokenLifetime} />
+                <PolicyField label="Refresh token lifetime" field={result.refreshTokenLifetime} dominantDriver={dominantDriver} />
                 <FieldCitations citations={citeFor('refreshTokenLifetime')} />
               </div>
             )}
@@ -111,19 +145,19 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
               <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col">
                 {result.absoluteSessionLimit !== null && (
                   <div>
-                    <PolicyField label="Absolute session limit" field={result.absoluteSessionLimit} />
+                    <PolicyField label="Absolute session limit" field={result.absoluteSessionLimit} dominantDriver={dominantDriver} />
                     <FieldCitations citations={citeFor('absoluteSessionLimit')} />
                   </div>
                 )}
                 {result.idleTimeoutIdp !== null && (
                   <div>
-                    <PolicyField label="Idle timeout — IdP" field={result.idleTimeoutIdp} />
+                    <PolicyField label="Idle timeout — IdP" field={result.idleTimeoutIdp} dominantDriver={dominantDriver} />
                     <FieldCitations citations={citeFor('idleTimeoutIdp')} />
                   </div>
                 )}
                 {result.idleTimeoutApp !== null && (
                   <div>
-                    <PolicyField label="Idle timeout — application" field={result.idleTimeoutApp} />
+                    <PolicyField label="Idle timeout — application" field={result.idleTimeoutApp} dominantDriver={dominantDriver} />
                     <FieldCitations citations={citeFor('idleTimeoutApp')} />
                   </div>
                 )}

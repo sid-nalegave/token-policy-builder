@@ -5,10 +5,12 @@ import { UpgradeNote } from './UpgradeNote'
 interface PolicyFieldProps {
   label: string
   field: NumericRecommendation
+  dominantDriver?: string
 }
 
-export function PolicyField({ label, field }: PolicyFieldProps) {
+export function PolicyField({ label, field, dominantDriver }: PolicyFieldProps) {
   const driver = field.rationale.replace(' drives this value.', '')
+  const showDriver = driver !== dominantDriver
 
   return (
     <div className="flex flex-col">
@@ -18,7 +20,9 @@ export function PolicyField({ label, field }: PolicyFieldProps) {
       <span className="text-2xl font-semibold tracking-display text-foreground mt-0.5">
         {formatMinutes(field.value)}
       </span>
-      <span className="text-xs text-muted-foreground mt-0.5">{driver}</span>
+      {showDriver && (
+        <span className="text-xs text-muted-foreground mt-0.5">{driver}</span>
+      )}
       <UpgradeNote note={field.upgradeNote} />
     </div>
   )
