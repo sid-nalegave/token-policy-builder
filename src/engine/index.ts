@@ -76,7 +76,7 @@ const SENSITIVITY_LABEL: Record<SensitivityTier, string> = {
 }
 
 const COMPLIANCE_LABEL: Partial<Record<ComplianceFramework, string>> = {
-  hipaa: 'HIPAA community practice',
+  hipaa: 'HIPAA industry practice',
   'fedramp-moderate': 'FedRAMP Moderate compliance controls',
   'fedramp-high': 'FedRAMP High compliance controls',
 }
@@ -198,15 +198,15 @@ function computeAbsoluteSessionLimit(inputs: PolicyInputs): NumericRecommendatio
   const label = isComplianceBinding ? COMPLIANCE_LABEL[complianceFramework]! : rawLabel
 
   const sensitivityFloorMap: Record<SensitivityTier, string> = {
-    low: 'Community practice. NIST SP 800-63B Rev 4 AAL1: session limit SHALL be established; SHOULD ≤30 days.',
+    low: 'Industry practice. NIST SP 800-63B Rev 4 AAL1: session limit SHALL be established; SHOULD ≤30 days.',
     medium:
       'NIST SP 800-63B Rev 4 AAL2: SHALL establish; SHOULD ≤24h. Recommendation is stricter at 12h — aligned with Rev 3 AAL2 SHALL.',
-    high: 'Community practice — stricter than AAL2 24h SHOULD, aligned with AAL3 12h SHALL as a conservative target.',
+    high: 'Industry practice — stricter than AAL2 24h SHOULD, aligned with AAL3 12h SHALL as a conservative target.',
   }
   // Keyed on ComplianceFramework to avoid silent breakage if COMPLIANCE_LABEL strings change.
   const complianceFloorMap: Partial<Record<ComplianceFramework, string>> = {
     hipaa:
-      'Community practice for ePHI access environments. HIPAA §164.312(a)(2)(iii) requires automatic logoff — no specific numeric value mandated.',
+      'Industry practice for ePHI access environments. HIPAA §164.312(a)(2)(iii) requires automatic logoff — no specific numeric value mandated.',
     'fedramp-moderate':
       'NIST SP 800-63B Rev 4 AAL2: SHALL establish; SHOULD ≤24h. Recommendation is stricter at 12h — aligned with Rev 3 AAL2 SHALL.',
     'fedramp-high': 'NIST SP 800-63B Rev 4 AAL3: SHALL ≤12h.',
@@ -241,7 +241,7 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
   const label = isComplianceBinding ? COMPLIANCE_LABEL[complianceFramework]! : rawLabel
 
   const sensitivityFloorMap: Record<SensitivityTier, string> = {
-    low: 'Community practice. NIST SP 800-63B Rev 4 AAL1: inactivity timeout is optional (MAY).',
+    low: 'Industry practice. NIST SP 800-63B Rev 4 AAL1: inactivity timeout is optional (MAY).',
     medium:
       'NIST SP 800-63B Rev 4 AAL2: inactivity timeout SHOULD ≤60 min. Recommendation is stricter at 30 min — aligned with Rev 3 AAL2 SHALL 30 min.',
     high: 'NIST SP 800-63B Rev 4 AAL3: inactivity timeout SHOULD ≤15 min.',
@@ -249,7 +249,7 @@ function computeIdleTimeout(inputs: PolicyInputs): NumericRecommendation | null 
   // Keyed on ComplianceFramework to avoid silent breakage if COMPLIANCE_LABEL strings change.
   const complianceFloorMap: Partial<Record<ComplianceFramework, string>> = {
     hipaa:
-      'Community practice. HIPAA §164.312(a)(2)(iii) automatic logoff is addressable — no specific numeric value mandated. 15 min is industry standard for clinical environments.',
+      'Industry practice. HIPAA §164.312(a)(2)(iii) automatic logoff is addressable — no specific numeric value mandated. 15 min is industry standard for clinical environments.',
     'fedramp-moderate':
       'NIST SP 800-63B Rev 4 AAL2: inactivity timeout SHOULD ≤60 min. SC-10 mandates inactivity disconnect — 30 min aligned with NIST Rev 3 AAL2 SHALL 30 min.',
     'fedramp-high':
@@ -399,7 +399,7 @@ function assembleCitations(inputs: PolicyInputs): PolicyCitation[] {
     field: 'accessTokenLifetime',
     standard: 'RFC 9700',
     clause: '§4.14.2',
-    note: 'Short-lived access tokens combined with refresh tokens. No specific numeric value mandated — recommendation reflects community practice by app type, sensitivity, and compliance framework.',
+    note: 'Short-lived access tokens combined with refresh tokens. No specific numeric value mandated — recommendation reflects industry practice by app type, sensitivity, and compliance framework.',
   })
   citations.push({
     field: 'accessTokenLifetime',
@@ -588,7 +588,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     refreshTokenRotation = {
       value: 'recommended',
       rationale: isHighAssurance
-        ? 'Defense-in-depth at high assurance. Community practice in regulated environments.'
+        ? 'Defense-in-depth at high assurance. Industry practice in regulated environments.'
         : 'Additional protection — not required by RFC 9700 §2.2.2 for confidential clients.',
       standardsFloor: 'RFC 9700 §2.2.2 does not require rotation for confidential clients.',
     }
@@ -617,7 +617,7 @@ export function computePolicy(inputs: PolicyInputs): PolicyResult {
     m2m: {
       recommendation:
         'Server-side secret store (vault, secrets manager, or environment variables with restricted access). Never in source code or client-accessible config.',
-      rationale: 'Community practice for client credentials management.',
+      rationale: 'Industry practice for client credentials management.',
       upgradeNote:
         'Prefer a dedicated secrets manager (HashiCorp Vault, AWS Secrets Manager) over environment variables for rotation and audit trail support.',
     },

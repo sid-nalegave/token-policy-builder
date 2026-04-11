@@ -7,7 +7,7 @@ import { PolicyField } from './PolicyField'
 import { RotationBadge } from './RotationBadge'
 import { TokenStorageField } from './TokenStorageField'
 import { ReAuthTriggers } from './ReAuthTriggers'
-import { CitationsPanel } from './CitationsPanel'
+import { FieldCitations } from './FieldCitations'
 import { UpgradeNote } from './UpgradeNote'
 import { toPolicyStatement } from '@/lib/toPolicyStatement'
 
@@ -42,6 +42,8 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 0)
   }
+
+  const citeFor = (field: string) => result.citations.filter((c) => c.field === field)
 
   const showReAuth =
     !isM2M &&
@@ -80,20 +82,24 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
 
           <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col">
             {/* Access token — always shown */}
-            <PolicyField label="Access token lifetime" field={result.accessTokenLifetime} />
+            <div>
+              <PolicyField label="Access token lifetime" field={result.accessTokenLifetime} />
+              <FieldCitations citations={citeFor('accessTokenLifetime')} />
+            </div>
 
             {/* Refresh token lifetime — hidden for M2M or when null */}
             {!isM2M && result.refreshTokenLifetime !== null && (
-              <PolicyField
-                label="Refresh token lifetime"
-                field={result.refreshTokenLifetime}
-              />
+              <div>
+                <PolicyField label="Refresh token lifetime" field={result.refreshTokenLifetime} />
+                <FieldCitations citations={citeFor('refreshTokenLifetime')} />
+              </div>
             )}
 
             {/* Rotation — hidden for M2M or when refresh tokens not in use */}
             {!isM2M && result.refreshTokenRotation.value !== 'not-applicable' && (
               <div className="md:col-span-2">
                 <RotationBadge rotation={result.refreshTokenRotation} />
+                <FieldCitations citations={citeFor('refreshTokenRotation')} />
               </div>
             )}
           </div>
@@ -103,25 +109,25 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
               <div className="border-t border-border my-6" />
 
               {result.absoluteSessionLimit !== null && (
-                <PolicyField
-                  label="Absolute session limit"
-                  field={result.absoluteSessionLimit}
-                />
+                <div>
+                  <PolicyField label="Absolute session limit" field={result.absoluteSessionLimit} />
+                  <FieldCitations citations={citeFor('absoluteSessionLimit')} />
+                </div>
               )}
 
               {(result.idleTimeoutIdp !== null || result.idleTimeoutApp !== null) && (
                 <div className="md:grid md:grid-cols-2 md:gap-x-8 gap-y-6 flex flex-col mt-6">
                   {result.idleTimeoutIdp !== null && (
-                    <PolicyField
-                      label="Idle timeout — IdP"
-                      field={result.idleTimeoutIdp}
-                    />
+                    <div>
+                      <PolicyField label="Idle timeout — IdP" field={result.idleTimeoutIdp} />
+                      <FieldCitations citations={citeFor('idleTimeoutIdp')} />
+                    </div>
                   )}
                   {result.idleTimeoutApp !== null && (
-                    <PolicyField
-                      label="Idle timeout — application"
-                      field={result.idleTimeoutApp}
-                    />
+                    <div>
+                      <PolicyField label="Idle timeout — application" field={result.idleTimeoutApp} />
+                      <FieldCitations citations={citeFor('idleTimeoutApp')} />
+                    </div>
                   )}
                 </div>
               )}
@@ -134,7 +140,10 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
 
           <div className="border-t border-border my-6" />
 
-          <TokenStorageField storage={result.tokenStorage} />
+          <div>
+            <TokenStorageField storage={result.tokenStorage} />
+            <FieldCitations citations={citeFor('tokenStorage')} />
+          </div>
         </section>
 
         {/* Re-auth triggers */}
@@ -147,16 +156,6 @@ export function ResultCard({ result, inputs, onReset }: ResultCardProps) {
               idp={result.reAuthTriggersIdp}
               app={result.reAuthTriggersApp}
             />
-          </section>
-        )}
-
-        {/* Citations */}
-        {result.citations.length > 0 && (
-          <section>
-            <h3 className="text-[11px] font-medium uppercase tracking-label text-muted-foreground mb-2">
-              Standards references
-            </h3>
-            <CitationsPanel citations={result.citations} />
           </section>
         )}
 

@@ -19,9 +19,6 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 export function CitationsPanel({ citations }: CitationsPanelProps) {
-  const [openFields, setOpenFields] = useState<Set<string>>(new Set())
-
-  // Group by field, preserving insertion order
   const groups = citations.reduce<Map<string, PolicyCitation[]>>((acc, c) => {
     const existing = acc.get(c.field)
     if (existing) {
@@ -31,6 +28,8 @@ export function CitationsPanel({ citations }: CitationsPanelProps) {
     }
     return acc
   }, new Map())
+
+  const [openFields, setOpenFields] = useState<Set<string>>(new Set())
 
   const toggle = (field: string) => {
     setOpenFields((prev) => {
